@@ -1,0 +1,15 @@
+{
+    "name": "enyziee/mvc2",
+    "autoload": {
+        "psr-4": {
+            "MVC\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Enyziee",
+            "email": "kenedysamuel63@gmail.com"
+        }
+    ],
+    "require": {}
+}
