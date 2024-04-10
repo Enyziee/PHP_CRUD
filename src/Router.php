@@ -19,7 +19,9 @@ class Router {
             $controller = new $controller();
             $controller->$action();
         } else {
-            throw new \Exception("No route found for URI: $uri");
+            header("HTTP/1.0 404 Not Found");
+            echo "$uri - 404 Not Found";
+            exit;
         }
     }
 }
