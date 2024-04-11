@@ -2,6 +2,7 @@
 
 namespace MVC\Models;
 
+use MVC\Models\Usuarios;
 use PDO;
 
 class DaoSingleton {
@@ -24,16 +25,21 @@ class DaoSingleton {
         }
     }
 
-    private function query($sql) {
+    private function query($sql, $params = null) {
         $pdo = $this->connection;
 
         try {
-            $results = $pdo->query($sql);
+            $stmt = $pdo->prepare($sql);
+            $err = $stmt->execute($params);
+            if (!$err) {
+                throw new \Exception("Erro ao executar a query");
+            }
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
         } catch (\Throwable $e) {
             echo "ERROR: " . $e->getMessage();
         }
-
-        return $results;
     }
 
     private function __construct() {}
@@ -46,15 +52,22 @@ class DaoSingleton {
         return self::$instance;
     }
 
-    public function findUserByEmail($email) {
-        $sql = "SELECT * FROM usuarios WHERE email = '$email'";
-        $results = $this->query($sql);
+    // Acesso de dados dos Usuários
 
-        return $results->fetch(PDO::FETCH_ASSOC);
+    public function saveUser(Usuarios $entity) {
+        $sql = "INSERT INTO usuarios (nome, email, senha) VALUES (?,?,?)";
+        $params = [$entity->nome, $entity->email, $entity->senha];
+        
+        $this->query($sql, $params);
     }
 
-
-
+    public function findUserByEmail($email) {
+        $sql = "SELECT * FROM usuarios WHERE email = ?";
+        $params = [$email];
+        $results = $this->query($sql, $params);
+        
+        return $results;
+    }
 
 }
 
