@@ -4,10 +4,19 @@ namespace MVC\Controllers;
 
 use MVC\Controller;
 use MVC\Models\DaoSingleton;
+use MVC\Models\Usuarios;
 
 class LoginController extends Controller {
+    public function home() {
+        $this->render('home');
+    }
+    
     public function loginPage() {
         $this->render('loginPage');
+    }
+
+    public function registerPage() {
+        $this->render('registerPage');
     }
 
     public function authenticate() {
@@ -15,10 +24,8 @@ class LoginController extends Controller {
         $password = $_POST['password'];
 
         if (empty($email) || empty($password)) {
-            header('Location: /mvc/login');
+            header('Location: mvc/login');
         }
-
-        echo $email . ' - ' . $password . '<br>';
 
         $dao = DaoSingleton::getInstance();
         $dao->connect();
@@ -32,6 +39,29 @@ class LoginController extends Controller {
         // } else {
         //     header('Location: /login');
         // }
+    }
+
+    public function register() {
+        $name = $_POST['name'];
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+
+        try {
+            $user = new Usuarios($name, $email, $password);
+        } catch (\Throwable $th) {
+            echo "ERROR: " . $th->getMessage();
+        }
+
+        if (empty($name) || empty($email) || empty($password)) {
+            header('Location: /mvc/login');
+        }
+
+        $dao = DaoSingleton::getInstance();
+        $dao->connect();
+
+        $dao->saveUser($user);
+
+        header('Location: /mvc/login');
     }
 }
     
