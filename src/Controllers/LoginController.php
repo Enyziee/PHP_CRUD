@@ -9,15 +9,15 @@ use MVC\Models\Usuarios;
 
 class LoginController extends Controller {
     public function home() {
-        $this->render('home');
+        $this->render('index');
     }
     
-    public function loginPage() {
-        $this->render('loginPage');
+    public function showLoginPage() {
+        $this->render('login/login');
     }
 
-    public function registerPage() {
-        $this->render('registerPage');
+    public function showRegisterPage() {
+        $this->render('login/register');
     }
 
     public function authenticate() {
@@ -25,49 +25,27 @@ class LoginController extends Controller {
         $password = $_POST['password'];
 
         if (empty($email) || empty($password)) {
-            header('Location: /login');
+            header("Location: /login");
         }
 
         $dao = DaoSingleton::getInstance();
-        $dao->connect();
-
-        $results = $dao->findUserByEmail($email);
-
         
-        session_start();
-        $_SESSION['email'] = $email;
 
-
-        var_dump($_SESSION);
-
-
-    //    if (count($results) == 0) {
-    //         header('Location: /login');
-    //     } else {
-    //         // var_dump($results[0]);
-
-    //         $user = new Usuarios($results[0]->nome,$results[0]->email, $results[0]->senha);
-
-
-
-    //         if ($password == $user->senha) {
-    //             $_SESSION[$user->email] = random_bytes(12);
-
-
-    //             // header('Location: /');
-    //         } else {
-    //             // header('Location: /login');
-    //         }
-    //    }
-            
-
+        $user = $dao->findUserByEmail($email);
         
-        // if ($user && password_verify($password, $user->password)) {
-        //     $_SESSION['user'] = $user->id;
-        //     header('Location: /');
-        // } else {
-        //     header('Location: /login');
-        // }
+        if (empty($user)) {
+            header('Location: /login');
+        } else {
+            if ($password == $user->senha) {
+                session_start();
+                $_SESSION['nome'] = $user->nome;
+                $_SESSION['logged'] = true;
+
+                header('Location: /');
+            } else {
+                header('Location: /login');
+            }
+       }
     }
 
     public function register() {
@@ -86,8 +64,6 @@ class LoginController extends Controller {
         }
 
         $dao = DaoSingleton::getInstance();
-        $dao->connect();
-
         $dao->saveUser($user);
 
         header('Location: /login');
