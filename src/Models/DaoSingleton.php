@@ -72,7 +72,7 @@ class DaoSingleton {
         return true;
     }
 
-    public function findUserByEmail($email): Usuarios {
+    public function findUserByEmail($email): Usuarios | bool {
         $sql = "SELECT * FROM usuarios WHERE email = ?";
         $params = [$email];
         $results = $this->query($sql, $params);
@@ -81,7 +81,7 @@ class DaoSingleton {
             return false;
         }
 
-        $user = new Usuarios($results[0]['nome'], $results[0]['email'], $results[0]['senha']);
+        $user = new Usuarios($results[0]['nome'], $results[0]['email'], $results[0]['senha'], $results[0]['id']);
 
         return $user;
     }
@@ -152,5 +152,36 @@ class DaoSingleton {
         $sucess = $this->query($sql, $params);
 
         return $sucess;
+    }
+
+
+    public function saveRecord($userid, $data): bool {
+        $serializedData = serialize($data);
+        
+        $sql = "INSERT INTO historico (userid, data) VALUES (?,?)";
+        $params = [$userid, $serializedData];
+
+        try {
+            $this->query($sql, $params);
+        } catch (\Throwable $th) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function getAllRecords($userid) {
+        $sql = "SELECT * FROM historico WHERE userid = ?";
+        $params = [$userid];
+        $results = $this->query($sql, $params);
+
+        $records = [];
+
+        foreach ($results as $row) {
+            $record = unserialize($row['data']);
+            array_push($records, $record);
+        }
+
+        return $records;
     }
 }

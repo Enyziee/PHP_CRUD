@@ -1,24 +1,15 @@
 <?php
 
+use MVC\Controllers\AuthController;
+use MVC\Controllers\CalorieController;
+use MVC\Controllers\UserController;
 use MVC\Router;
-use MVC\Controllers\LoginController;
-use MVC\Controllers\ProdutosController;
 
 $router = new Router();
 
-$router->addRoute('/', LoginController::class, 'home');
+$router->POST('login', AuthController::class, 'login');
+$router->POST('register', AuthController::class, 'register');
 
-$router->addRoute('login', LoginController::class, 'showLoginPage');
-$router->addRoute('register', LoginController::class, 'showRegisterPage');
+$router->POST('calculate', CalorieController::class, 'calculateBMR');
 
-$router->addRoute('auth/login', LoginController::class, 'authenticate');
-$router->addRoute('auth/register', LoginController::class, 'register');
-
-$router->addRoute('produtos', ProdutosController::class, 'index');
-$router->addRoute('produtos/create', ProdutosController::class, 'showCreateProduct');
-
-$router->addRoute('produtos/saveproduct', ProdutosController::class, 'createProduct');
-$router->addRoute('produtos/updateproduct', ProdutosController::class, 'updateProduct');
-$router->addRoute('produtos/deleteproduct', ProdutosController::class, 'deleteProduct');
-
-
+$router->GET('history', UserController::class, 'getHistory');
