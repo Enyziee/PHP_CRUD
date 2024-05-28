@@ -1,0 +1,119 @@
+{
+	"info": {
+		"_postman_id": "6508b829-162a-489d-9d37-9bbf07ee8386",
+		"name": "API PHP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30180686"
+	},
+	"item": [
+		{
+			"name": "History",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXaVCJ9.eyJ1c2VyaWQiOjIsImlhdCI6MTcxNjkyNTcxNiwiZXhwIjoxNzE2OTI2NjE2fQ.c43ea881fdd71a93a74aedcab0c28b7f8200bb7e2b6281d7a58e469c8799ccbe",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/history",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"history"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Calculate BMR",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"age\": 25,\r\n    \"gender\": \"male\",\r\n    \"height\": 180,\r\n    \"weight\": 65\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/calculate",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"calculate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"test1\",\r\n    \"password\": \"test\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/login",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"nome\": \"test\",\r\n    \"email\": \"test1@test.br\",\r\n    \"password\": \"test\",\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/register",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
