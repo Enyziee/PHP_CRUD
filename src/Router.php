@@ -2,39 +2,54 @@
 
 namespace MVC;
 
+use Closure;
+use Exception;
+
 class Router {
-    protected $getRoutes = [];
-    protected $postRoutes = [];
+    protected $routes = [];
 
-    public function __construct() {}
-
-    public function GET($route, $controller, $action) {
-        $this->getRoutes[$route] = ['controller' => $controller, 'action' => $action];
+    public function GET(string $url, $controller , string $target) {
+        $this->addRoute('GET', $url, $controller, $target);
     }
 
-    public function POST($route, $controller, $action) {
-        $this->postRoutes[$route] = ['controller' => $controller, 'action' => $action];
+    public function POST(string $url, $controller , string $target) {
+        $this->addRoute('POST', $url, $controller, $target);
     }
 
-    public function dispatch($uri) {
-        $routes = [];
+    public function PUT(string $url, $controller , string $target) {
+        $this->addRoute('PUT', $url, $controller, $target);
+    }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            $routes = $this->getRoutes;
-        } else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $routes = $this->postRoutes;
-        }
-        
-        if (array_key_exists($uri, $routes)) {
-            $controller = $routes[$uri]['controller'];
-            $action = $routes[$uri]['action'];
+    public function DELETE(string $url, $controller , string $target) {
+        $this->addRoute('DELETE', $url, $controller, $target);
+    }
 
-            $controller = new $controller();
-            $controller->$action();
-        } else {
-            // header("HTTP/1.0 404 Not Found");
-            echo "$uri - 404 Not Found";
-            exit;
+    protected function addRoute(string $method, string $url, $controller , string $target) {
+        $this->routes[$method][$url] = ['controller' => $controller, 'target' => $target];
+    }
+
+    public function matchRoute() {
+        $method = $_SERVER['REQUEST_METHOD'];
+        $url = $_SERVER['REQUEST_URI'];
+
+        if (isset($this->routes[$method])) {
+            foreach ($this->routes[$method] as $routeUrl => $target) {
+                
+                $pattern = preg_replace('/\/:([^\/]+)/', '/(?P<$1>[^/]+)', $routeUrl);
+
+                if (preg_match('#^' . $pattern . '$#', $url, $matches)) {
+
+                    $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
+                    
+                    $controller = new $target['controller'];
+                    $action = $target['target'];
+
+                    $controller->$action($params);
+                    
+                    return;
+                }
+            }
         }
+        throw new Exception('Route not found');
     }
 }

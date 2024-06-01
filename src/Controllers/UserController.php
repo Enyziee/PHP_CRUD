@@ -3,10 +3,68 @@
 namespace MVC\Controllers;
 
 use MVC\Models\DaoSingleton;
+use MVC\Models\Usuarios;
 use MVC\Modules\JWT;
 use stdClass;
 
 class UserController {
+    public function getUserInfo($params) {
+        $dao = DaoSingleton::getInstance();
+
+        $result = null;
+
+        if (!isset($params['id'])) {
+            return;
+        }
+
+        $result = $dao->findUserById($params['id']);
+
+        if (!$result) {
+            header('HTTP/1.1 404 Not Found');
+            return;
+        }
+        
+        $response = new stdClass();
+        $response->data = $result;
+        
+        header('Content-Type: application/json');
+        echo json_encode($response);
+    }
+
+    public function getAllUsersInfo() {
+        $dao = DaoSingleton::getInstance();
+
+        $result = $dao->getAllUsers();
+
+        $response = new stdClass();
+        $response->data = $result;
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
+    }
+
+    public function updateUserInfo($params) {
+        $dao = DaoSingleton::getInstance();
+
+        $values =  json_decode(file_get_contents('php://input'), true);
+
+        $nome = $values['nome'];
+        $email = $values['email'];
+
+        $user = $dao->findUserById($params['id']);
+
+        if ($nome) {
+            $user->nome = $nome;
+        }
+
+        if ($email) {
+            $user->email = $email;
+        }
+
+        $dao->updateUserInfo($user);
+
+    }
+
     public function getHistory() {
         $token = explode(' ', $_SERVER['HTTP_AUTHORIZATION']);
 

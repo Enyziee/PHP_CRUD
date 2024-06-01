@@ -12,7 +12,7 @@ class DaoSingleton {
     private static $instance = null;
 
     private $connection = null;
-    private $dsn = "mysql:host=localhost;dbname=patrick_db";
+    private $dsn = "mysql:host=localhost;dbname=txotagay";
     private $username = "admin";
     private $password = "root";
 
@@ -72,19 +72,62 @@ class DaoSingleton {
         return true;
     }
 
-    public function findUserByEmail($email): Usuarios | bool {
+    public function findUserByEmail($email): ?Usuarios {
         $sql = "SELECT * FROM usuarios WHERE email = ?";
         $params = [$email];
         $results = $this->query($sql, $params);
 
         if ($results[0] == null) {
-            return false;
+            return null;
         }
 
         $user = new Usuarios($results[0]['nome'], $results[0]['email'], $results[0]['senha'], $results[0]['id']);
 
         return $user;
     }
+
+    public function findUserById($id): ?Usuarios {
+        $sql = "SELECT * FROM usuarios WHERE id = ?";
+        $params = [$id];
+        $results = $this->query($sql, $params);
+
+        if ($results[0] == null) {
+            return null;
+        }
+
+        $user = new Usuarios($results[0]['nome'], $results[0]['email'], $results[0]['senha'], $results[0]['id']);
+
+        return $user;
+    }
+
+    public function getAllUsers(): array {
+        $sql = "SELECT * FROM usuarios";
+        $results = $this->query($sql);
+
+        if ($results == null) {
+            return [];
+        }
+
+        $users = [];
+
+        foreach ($results as $row) {
+            $user = new Usuarios($row['nome'], $row['email'], $row['senha'], $row['id']);
+            array_push($users, $user);
+        }
+        
+        return $users; 
+    }
+
+    public function updateUserInfo(Usuarios $entity) {
+        $sql = "UPDATE usuarios SET nome = ?, email = ?, senha = ? WHERE id = ?";
+        $params = [$entity->nome, $entity->email, $entity->senha, $entity->id];
+        $results = $this->query($sql, $params);
+
+        if ($results == null) {
+            return [];
+        }
+    }
+
 
     // Acesso de dados dos Produtos
 
@@ -169,7 +212,6 @@ class DaoSingleton {
 
         return true;
     }
-
     public function getAllRecords($userid) {
         $sql = "SELECT * FROM historico WHERE userid = ?";
         $params = [$userid];
