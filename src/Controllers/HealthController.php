@@ -153,8 +153,7 @@ class HealthController {
         echo json_encode($result);
 
     }
-    public function addDayMeals() {}
-    public function getLastMeals() {}
+
     public function getBMR() {
         $payload = Authorization::decodeJWT();
         
