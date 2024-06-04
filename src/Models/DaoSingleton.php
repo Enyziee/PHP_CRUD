@@ -12,7 +12,7 @@ class DaoSingleton {
     private static $instance = null;
 
     private ?PDO $connection = null;
-    private $dsn = "mysql:host=localhost;dbname=txotagay";
+    private $dsn = "mysql:host=localhost;dbname=bluependb";
     private $username = "admin";
     private $password = "root";
 
@@ -162,7 +162,24 @@ class DaoSingleton {
         $params = [$sexo, $peso, $altura, $idade, $userid];
         $this->query($sql, $params);
     }
+
     
+    public function addDaySteps($userid, $passos) {
+        $sql = "INSERT INTO passos (userid, passos) VALUES (?,?)";
+        $params = [$userid, $passos];
 
+        $this->query($sql, $params);
+    }
 
+    public function getLastSteps($userid) {
+        $sql = "SELECT * FROM passos WHERE userid = ? ORDER BY id DESC LIMIT 7";
+        $params = [$userid];
+        $results = $this->query($sql, $params);
+
+        if ($results == false) {
+            return null;
+        }
+
+        return $results;
+    }
 }

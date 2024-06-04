@@ -31,8 +31,5 @@ $router->PUT('/health', HealthController::class, 'updateHealthInfo');
 $router->POST('/health/steps', HealthController::class, 'addDaySteps');
 $router->GET('/health/steps', HealthController::class, 'getLastSteps');
 
-// $router->POST('/health/meals', HealthController::class, 'addDayMeals');
-// $router->GET('/health/meals', HealthController::class, 'getLastMeals');
-
 $router->GET('/health/bmr', HealthController::class, 'getBMR');
 

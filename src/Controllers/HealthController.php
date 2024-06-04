@@ -104,8 +104,55 @@ class HealthController {
         header('Content-Type: application/json');
         echo json_encode(['message' => 'Health info updated']);
     }
-    public function addDaySteps() {}
-    public function getLastSteps() {}
+
+    public function addDaySteps() {
+        $payload = Authorization::decodeJWT();
+        
+        if (!$payload) {
+            header('HTTP/1.1 401 Unauthorized');
+            return;
+        }
+
+        $userid = $payload['userid'];
+
+        $values =  json_decode(file_get_contents('php://input'), true);
+
+        if (!$values['passos'] || !$values['userid']) {
+            header('HTTP/1.1 400 Bad Request');
+            return;
+        }
+
+        $dao = DaoSingleton::getInstance();
+
+        $dao->addDaySteps($userid, $values['passos']);
+
+        header('HTTP/1.1 201 Created');
+        header('Content-Type: application/json');
+        echo json_encode(['message' => 'Steps saved']);
+
+    }
+    public function getLastSteps() {
+        $payload = Authorization::decodeJWT();
+        
+        if (!$payload) {
+            header('HTTP/1.1 401 Unauthorized');
+            return;
+        }
+
+        $userid = $payload['userid'];
+
+        $dao = DaoSingleton::getInstance();
+        $result = $dao->getLastSteps($userid);
+
+        if (!$result) {
+            header('HTTP/1.1 404 Not Found');
+            return;
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($result);
+
+    }
     public function addDayMeals() {}
     public function getLastMeals() {}
     public function getBMR() {
