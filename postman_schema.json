@@ -288,13 +288,33 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/health",
+							"raw": "localhost:8080/health/bmr",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"health"
+								"health",
+								"bmr"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pega os ultimos passos do usuário",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/health/steps",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"health",
+								"steps"
 							]
 						}
 					},
@@ -353,6 +373,34 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Salva passos",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userid\": 11,\r\n    \"passos\": 130\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/health/steps",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"health",
+								"steps"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}
@@ -362,7 +410,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOjksInJvbGUiOiJhZG1pbiIsImlhdCI6MTcxNzUyMTM4NiwiZXhwIjoxNzE3NTIzMTg2fQ.918f05dc18bc5827645868986b768f87aff773ed790b839ea96ebdecacbb1199",
 				"type": "string"
 			}
 		]
