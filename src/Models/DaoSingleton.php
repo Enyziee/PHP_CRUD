@@ -11,7 +11,7 @@ class DaoSingleton {
 
     private static $instance = null;
 
-    private $connection = null;
+    private ?PDO $connection = null;
     private $dsn = "mysql:host=localhost;dbname=txotagay";
     private $username = "admin";
     private $password = "root";
@@ -28,24 +28,16 @@ class DaoSingleton {
     }
 
     private function query($sql, $params = null) {
-        $pdo = $this->connection;
+        $pdo = $this->connection;        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
 
-        try {
-            $stmt = $pdo->prepare($sql);
-            $sucess = $stmt->execute($params);
-            if (!$sucess) {
-                throw new \Exception("Erro ao executar a query");
-            }
-
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (\Throwable $e) {
-            echo "ERROR: " . $e->getMessage();
-        }
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     private function __construct() {}
 
-    public static function getInstance() {
+    public static function getInstance(): DaoSingleton {
         if (self::$instance == null) {
             self::$instance = new DaoSingleton();
         }
@@ -60,8 +52,8 @@ class DaoSingleton {
     // Acesso de dados dos Usuários
 
     public function saveUser(Usuarios $entity): bool {
-        $sql = "INSERT INTO usuarios (nome, email, senha) VALUES (?,?,?)";
-        $params = [$entity->nome, $entity->email, $entity->senha];
+        $sql = "INSERT INTO usuarios (nome, email, senha, role) VALUES (?,?,?,?)";
+        $params = [$entity->nome, $entity->email, $entity->senha, $entity->role];
 
         try {
             $this->query($sql, $params);
@@ -81,7 +73,13 @@ class DaoSingleton {
             return null;
         }
 
-        $user = new Usuarios($results[0]['nome'], $results[0]['email'], $results[0]['senha'], $results[0]['id']);
+        $user = new Usuarios(
+            $results[0]['nome'],
+            $results[0]['email'],
+            $results[0]['senha'],
+            $results[0]['role'],
+            $results[0]['id']
+        );
 
         return $user;
     }
@@ -91,11 +89,17 @@ class DaoSingleton {
         $params = [$id];
         $results = $this->query($sql, $params);
 
-        if ($results[0] == null) {
+        if ($results == false || $results[0] == false) {
             return null;
         }
 
-        $user = new Usuarios($results[0]['nome'], $results[0]['email'], $results[0]['senha'], $results[0]['id']);
+        $user = new Usuarios(
+            $results[0]['nome'],
+            $results[0]['email'],
+            $results[0]['senha'],
+            $results[0]['role'],
+            $results[0]['id']
+        );
 
         return $user;
     }
@@ -104,14 +108,14 @@ class DaoSingleton {
         $sql = "SELECT * FROM usuarios";
         $results = $this->query($sql);
 
-        if ($results == null) {
+        if ($results == false) {
             return [];
         }
 
         $users = [];
 
         foreach ($results as $row) {
-            $user = new Usuarios($row['nome'], $row['email'], $row['senha'], $row['id']);
+            $user = new Usuarios($row['nome'], $row['email'], $row['senha'], $row['role'], $row['id']);
             array_push($users, $user);
         }
         
@@ -119,111 +123,46 @@ class DaoSingleton {
     }
 
     public function updateUserInfo(Usuarios $entity) {
-        $sql = "UPDATE usuarios SET nome = ?, email = ?, senha = ? WHERE id = ?";
-        $params = [$entity->nome, $entity->email, $entity->senha, $entity->id];
+        $sql = "UPDATE usuarios SET nome = ?, email = ?, role = ? WHERE id = ?";
+        $params = [$entity->nome, $entity->email, $entity->role, $entity->id];
         $results = $this->query($sql, $params);
 
-        if ($results == null) {
-            return [];
+        if ($results == false) {
+            null;
         }
     }
 
-
-    // Acesso de dados dos Produtos
-
-    public function saveProduct(Produtos $entity): bool {
-        $sql = "INSERT INTO produtos (nome, descricao, quantidade, preco, categoria) VALUES (?,?,?,?,?)";
-        $params = [
-            $entity->nome,
-            $entity->descricao,
-            $entity->quantidade,
-            $entity->preco, 
-            $entity->categoria,
-        ];
-
-        try {
-            $this->query($sql, $params);
-        } catch (\Throwable $th) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public function findProductById($id): Produtos {
-        $sql = "SELECT * FROM produtos WHERE id = ?";
+    public function deleteUserById(string $id) {
+        $sql = "DELETE FROM usuarios WHERE id = ?";
         $params = [$id];
-        $results = $this->query($sql, $params);
-
-        $produto = new Produtos(
-            $results[0]['nome'],
-            $results[0]['descricao'],
-            $results[0]['quantidade'],
-            $results[0]['preco'],
-            $results[0]['categoria'],
-            $results[0]['id'],
-        );  
-
-        return $produto;
-    }
-
-    public function findAllProducts(): array {
-        $sql = "SELECT * FROM produtos";
-        $results = $this->query($sql);
-
-        $produtos = [];
-
-        foreach ($results as $row) {
-            $user = new Produtos(
-                $row['nome'],
-                $row['descricao'],
-                $row['quantidade'],
-                $row['preco'],
-                $row['categoria'],
-                $row['id'],
-            );
-            array_push($produtos, $user);
-        }
-
-        return $produtos;
-    }
-
-    public function deleteProductById($id): bool {
-        $sql = "DELETE FROM produtos WHERE id = ?";
-        $params = [$id];
-
-        $sucess = $this->query($sql, $params);
-
-        return $sucess;
+        $this->query($sql, $params);
     }
 
 
-    public function saveRecord($userid, $data): bool {
-        $serializedData = serialize($data);
-        
-        $sql = "INSERT INTO historico (userid, data) VALUES (?,?)";
-        $params = [$userid, $serializedData];
-
-        try {
-            $this->query($sql, $params);
-        } catch (\Throwable $th) {
-            return false;
-        }
-
-        return true;
+    public function saveHealthInfo(string $userid, string $sexo, int $peso, int $altura, int $idade) {
+        $sql = "INSERT INTO informacoes (userid, sexo, peso, altura, idade) VALUES (?,?,?,?,?)";
+        $params = [$userid, $sexo, $peso, $altura, $idade];
+        $this->query($sql, $params);
     }
-    public function getAllRecords($userid) {
-        $sql = "SELECT * FROM historico WHERE userid = ?";
+
+    public function getHealthInfo(string $userid) {
+        $sql = "SELECT * FROM informacoes WHERE userid = ?";
         $params = [$userid];
         $results = $this->query($sql, $params);
 
-        $records = [];
-
-        foreach ($results as $row) {
-            $record = unserialize($row['data']);
-            array_push($records, $record);
+        if ($results == false) {
+            return null;
         }
 
-        return $records;
+        return $results[0];
     }
+
+    public function updateHealthInfo($userid, $sexo, $peso, $altura, $idade) {
+        $sql = "UPDATE informacoes SET sexo = ?, peso = ?, altura = ?, idade = ? WHERE userid = ?";
+        $params = [$sexo, $peso, $altura, $idade, $userid];
+        $this->query($sql, $params);
+    }
+    
+
+
 }

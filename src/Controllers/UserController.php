@@ -3,21 +3,24 @@
 namespace MVC\Controllers;
 
 use MVC\Models\DaoSingleton;
-use MVC\Models\Usuarios;
 use MVC\Modules\JWT;
 use stdClass;
 
 class UserController {
-    public function getUserInfo($params) {
-        $dao = DaoSingleton::getInstance();
 
-        $result = null;
+    public function getUserInfo() {
+        $token = explode(' ', $_SERVER['HTTP_AUTHORIZATION']);
+        $payload = JWT::verifyJWT($token[1]);
 
-        if (!isset($params['id'])) {
+        if (!$payload) {
+            header('HTTP/1.1 401 Unauthorized');
             return;
         }
+        
+        $userid = $payload['userid'];
 
-        $result = $dao->findUserById($params['id']);
+        $dao = DaoSingleton::getInstance();
+        $result = $dao->findUserById($userid);
 
         if (!$result) {
             header('HTTP/1.1 404 Not Found');
@@ -26,32 +29,28 @@ class UserController {
         
         $response = new stdClass();
         $response->data = $result;
-        
-        header('Content-Type: application/json');
-        echo json_encode($response);
-    }
-
-    public function getAllUsersInfo() {
-        $dao = DaoSingleton::getInstance();
-
-        $result = $dao->getAllUsers();
-
-        $response = new stdClass();
-        $response->data = $result;
+        unset($response->data->senha);
 
         header('Content-Type: application/json');
         echo json_encode($response);
     }
 
-    public function updateUserInfo($params) {
-        $dao = DaoSingleton::getInstance();
+    
+    public function updateUserInfo() {
+        $token = explode(' ', $_SERVER['HTTP_AUTHORIZATION']);
+        $payload = JWT::verifyJWT($token[1]);
+
+        if (!$payload) {
+            header('HTTP/1.1 401 Unauthorized');
+            return;
+        }
 
         $values =  json_decode(file_get_contents('php://input'), true);
-
         $nome = $values['nome'];
         $email = $values['email'];
 
-        $user = $dao->findUserById($params['id']);
+        $dao = DaoSingleton::getInstance();
+        $user = $dao->findUserById($payload['userid']);
 
         if ($nome) {
             $user->nome = $nome;
@@ -62,40 +61,28 @@ class UserController {
         }
 
         $dao->updateUserInfo($user);
-
     }
 
-    public function getHistory() {
+    public function deleteUser() {
         $token = explode(' ', $_SERVER['HTTP_AUTHORIZATION']);
+        $payload = JWT::verifyJWT($token[1]);
 
-        if (!$token[1]) {
+        if (!$payload) {
             header('HTTP/1.1 401 Unauthorized');
             return;
         }
-
-        $payload = null;
-
-        try {
-            $payload = JWT::verifyJWT($token[1]);
-        } catch (\Throwable $th) {
-            header('HTTP/1.1 401 Unauthorized');
-            return;
-        }
-
-
-        $dao = DaoSingleton::getInstance();
-
-        $userid = json_decode($payload, true)['userid'];
-
-        $result = $dao->getAllRecords($userid);
         
-        $response = new stdClass();
-        $response->data = [];
-
-
-        foreach ($result as $key => $value) {
-            array_push($response->data, json_decode($value));
+        $dao = DaoSingleton::getInstance();
+        
+        try {
+            $dao->deleteUserById($payload['userid']);
+        } catch (\Throwable $th) {
+            header('HTTP/1.1 500 Internal Server Error');
+            return;
         }
+
+        $response = new stdClass();
+        $response->message = 'User deleted successfully';
 
         header('Content-Type: application/json');
         echo json_encode($response);

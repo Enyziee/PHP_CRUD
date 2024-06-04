@@ -2,7 +2,6 @@
 
 namespace MVC;
 
-use Closure;
 use Exception;
 
 class Router {

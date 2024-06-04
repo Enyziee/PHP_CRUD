@@ -11,9 +11,9 @@ class AuthController {
         $values =  json_decode(file_get_contents('php://input'), true);
 
         $email = $values['email'];
-        $password = $values['password'];
+        $senha = $values['senha'];
 
-        if (!$email || !$password) {
+        if (!$email || !$senha) {
             header('HTTP/1.1 400 Bad Request');
             return;
         }
@@ -26,7 +26,7 @@ class AuthController {
             return;
         }
 
-        echo JWT::createJWT($user->id);
+        echo JWT::createJWT($user);
     }
 
     public function register() {
@@ -56,8 +56,7 @@ class AuthController {
             return;
         }
 
-
         header('HTTP/1.1 201 Created');
-        echo JWT::createJWT($dao->findUserByEmail($email)->id);
+        echo JWT::createJWT($dao->findUserByEmail($email));
     }
 }
